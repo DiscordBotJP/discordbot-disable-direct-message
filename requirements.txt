@@ -1,0 +1,4 @@
+discord.py
+python-dotenv
+motor
+Daug==2023.12.9.1
