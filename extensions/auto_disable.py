@@ -11,7 +11,7 @@ class AutoDisableDirectMessageCog(commands.Cog):
         self.bot = bot
         self.auto_disable.start()
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=6)
     @excepter
     @dpylogger
     async def auto_disable(self):
