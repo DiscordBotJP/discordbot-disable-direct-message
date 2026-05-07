@@ -54,16 +54,14 @@ python main.py
 - `docs/discord_security_spec.md`
 
 
+
+
 ## コンフリクト対策（セキュリティメニュー設定との干渉抑制）
 
-本Botは `guild.edit(dms_disabled_until=...)` を呼び出すため、Discord側仕様や将来変更によっては、
-セキュリティメニュー内の他項目に意図しない影響が出る可能性があります（未確認、必要に応じて確認）。
+DM一時停止のみ更新した場合に、手動設定した招待一時停止が解除される事象へ対策を実装しています。
 
-このリポジトリでは、干渉リスクを下げるために以下の制御を実装しています。
+- `guild.edit` 時に `invites_disabled_until` と `dms_disabled_until` を同時送信
+- 招待一時停止は `guild.invites_paused_until` の現値を読み取り、その値を再送して保持
 
-- `DM_DISABLE_ENABLED_GUILD_IDS`（カンマ区切りGuild ID）で対象サーバーを限定可能
-- `DM_DISABLE_MIN_REMAINING_HOURS` 以上の残り時間がある場合は `guild.edit` を実行しない
-- `DM_DISABLE_TARGET_HOURS` で延長先時間を調整可能
-- DM更新時に `invites_disabled_until` も同時に送信し、手動設定した招待一時停止が解除されにくいよう対策
-
-環境変数未設定時は従来互換の動作（全Guild対象、24時間先へ延長、12時間未満でのみ更新）です。
+また、`discord.py` の `Guild.edit` で incident actions として明示的に更新可能な値を精査し、
+本Botが扱うべき同種の値は `invites_disabled_until` と `dms_disabled_until` であることを確認しました。
