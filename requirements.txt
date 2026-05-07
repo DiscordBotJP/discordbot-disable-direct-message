@@ -1,4 +1,4 @@
-discord.py==2.6
+discord.py==2.6.4
 python-dotenv
 motor
 Daug==2023.12.9.1

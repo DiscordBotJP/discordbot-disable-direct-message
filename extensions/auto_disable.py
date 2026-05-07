@@ -15,13 +15,18 @@ class AutoDisableDirectMessageCog(commands.Cog):
     @excepter
     @dpylogger
     async def auto_disable(self):
-        dms_disabled_until = discord.utils.utcnow() + datetime.timedelta(hours=24)
+        now = discord.utils.utcnow()
+        dms_disabled_until = now + datetime.timedelta(hours=24)
+
         for guild in self.bot.guilds:
+            invites_paused_until = guild.invites_paused_until
             try:
-                await guild.edit(dms_disabled_until=dms_disabled_until)
+                await guild.edit(
+                    invites_disabled_until=invites_paused_until,
+                    dms_disabled_until=dms_disabled_until,
+                )
             except discord.errors.Forbidden:
                 pass
-
 
     @auto_disable.before_loop
     async def before_auto_disable(self):
