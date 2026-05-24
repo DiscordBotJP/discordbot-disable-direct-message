@@ -8,6 +8,19 @@ from daug.utils.dpylog import dpylogger
 from utils.ops_log import exception_message, send_ops_log
 
 
+def normalize_incident_until(
+    value: datetime.datetime | None,
+    now: datetime.datetime,
+) -> datetime.datetime | None:
+    if value is None:
+        return None
+
+    if value <= now:
+        return None
+
+    return value
+
+
 class AutoDisableDirectMessageCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -36,9 +49,13 @@ class AutoDisableDirectMessageCog(commands.Cog):
 
         for guild in self.bot.guilds:
             invites_paused_until = guild.invites_paused_until
+            invites_disabled_until = normalize_incident_until(
+                invites_paused_until,
+                now,
+            )
             try:
                 await guild.edit(
-                    invites_disabled_until=invites_paused_until,
+                    invites_disabled_until=invites_disabled_until,
                     dms_disabled_until=dms_disabled_until,
                 )
                 updated_count += 1
@@ -54,6 +71,12 @@ class AutoDisableDirectMessageCog(commands.Cog):
                     guild_name=guild.name,
                     extra={
                         'dmsDisabledUntil': dms_disabled_until.isoformat(),
+                        'invitesPausedUntil': invites_paused_until.isoformat()
+                        if invites_paused_until
+                        else None,
+                        'invitesDisabledUntil': invites_disabled_until.isoformat()
+                        if invites_disabled_until
+                        else None,
                     },
                 )
             except Exception as error:
@@ -68,6 +91,12 @@ class AutoDisableDirectMessageCog(commands.Cog):
                     guild_name=guild.name,
                     extra={
                         'dmsDisabledUntil': dms_disabled_until.isoformat(),
+                        'invitesPausedUntil': invites_paused_until.isoformat()
+                        if invites_paused_until
+                        else None,
+                        'invitesDisabledUntil': invites_disabled_until.isoformat()
+                        if invites_disabled_until
+                        else None,
                     },
                 )
 
