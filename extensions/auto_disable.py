@@ -8,6 +8,12 @@ from daug.utils.dpylog import dpylogger
 from utils.ops_log import exception_message, send_ops_log
 
 
+INCIDENT_NOTICE_MESSAGE_TYPES = {
+    discord.MessageType.guild_incident_alert_mode_enabled,
+    discord.MessageType.guild_incident_alert_mode_disabled,
+}
+
+
 def normalize_incident_until(
     value: datetime.datetime | None,
     now: datetime.datetime,
@@ -113,6 +119,49 @@ class AutoDisableDirectMessageCog(commands.Cog):
                 'dmsDisabledUntil': dms_disabled_until.isoformat(),
             },
         )
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        if message.guild is None:
+            return
+
+        if message.type not in INCIDENT_NOTICE_MESSAGE_TYPES:
+            return
+
+        try:
+            await message.delete()
+        except discord.errors.NotFound:
+            return
+        except discord.errors.Forbidden as error:
+            await send_ops_log(
+                event_type='incident_notice_delete_forbidden',
+                severity='warning',
+                title='Incident notice delete skipped: missing permission',
+                summary='Bot could not delete Discord incident security notice.',
+                message=str(error),
+                guild_id=str(message.guild.id),
+                guild_name=message.guild.name,
+                extra={
+                    'channelId': str(message.channel.id),
+                    'messageId': str(message.id),
+                    'messageType': message.type.name,
+                },
+            )
+        except Exception as error:
+            await send_ops_log(
+                event_type='incident_notice_delete_error',
+                severity='error',
+                title='Incident notice delete failed',
+                summary='Unexpected error while deleting Discord incident security notice.',
+                message=exception_message(error),
+                guild_id=str(message.guild.id),
+                guild_name=message.guild.name,
+                extra={
+                    'channelId': str(message.channel.id),
+                    'messageId': str(message.id),
+                    'messageType': message.type.name,
+                },
+            )
 
     @auto_disable.before_loop
     async def before_auto_disable(self):
