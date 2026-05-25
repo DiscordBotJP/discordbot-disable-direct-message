@@ -128,6 +128,12 @@ class AutoDisableDirectMessageCog(commands.Cog):
         if message.type not in INCIDENT_NOTICE_MESSAGE_TYPES:
             return
 
+        if self.bot.user is None:
+            return
+
+        if message.author.id != self.bot.user.id:
+            return
+
         try:
             await message.delete()
         except discord.errors.NotFound:
@@ -144,6 +150,7 @@ class AutoDisableDirectMessageCog(commands.Cog):
                 extra={
                     'channelId': str(message.channel.id),
                     'messageId': str(message.id),
+                    'messageAuthorId': str(message.author.id),
                     'messageType': message.type.name,
                 },
             )
@@ -159,6 +166,7 @@ class AutoDisableDirectMessageCog(commands.Cog):
                 extra={
                     'channelId': str(message.channel.id),
                     'messageId': str(message.id),
+                    'messageAuthorId': str(message.author.id),
                     'messageType': message.type.name,
                 },
             )
