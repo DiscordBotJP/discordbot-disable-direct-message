@@ -1,12 +1,14 @@
 import datetime
+import logging
+
 import discord
 from discord.ext import commands
 from discord.ext import tasks
-from daug.utils.dpyexcept import excepter
-from daug.utils.dpylog import dpylogger
 
 from utils.ops_log import exception_message, send_ops_log
 
+
+logger = logging.getLogger(__name__)
 
 INCIDENT_NOTICE_MESSAGE_TYPES = {
     discord.MessageType.guild_incident_alert_mode_enabled,
@@ -28,14 +30,28 @@ def normalize_incident_until(
 
 
 class AutoDisableDirectMessageCog(commands.Cog):
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.auto_disable.start()
 
+    def cog_unload(self) -> None:
+        self.auto_disable.cancel()
+
     @tasks.loop(hours=6)
-    @excepter
-    @dpylogger
-    async def auto_disable(self):
+    async def auto_disable(self) -> None:
+        try:
+            await self.update_guild_security_settings()
+        except Exception as error:
+            logger.exception('DM auto disable task failed')
+            await send_ops_log(
+                event_type='auto_disable_task_error',
+                severity='error',
+                title='DM auto disable task failed',
+                summary='Unexpected task-level error stopped this run.',
+                message=exception_message(error),
+            )
+
+    async def update_guild_security_settings(self) -> None:
         now = discord.utils.utcnow()
         dms_disabled_until = now + datetime.timedelta(hours=24)
         updated_count = 0
