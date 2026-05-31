@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from constants import TOKEN
+from utils.ops_log import send_ops_log
 
 EXTENSIONS = (
     'auto_disable',
@@ -24,10 +25,27 @@ class DisableDirectMessageBot(commands.Bot):
             help_command=None,
             intents=build_intents(),
         )
+        self._startup_event_sent = False
 
     async def setup_hook(self) -> None:
         for extension in EXTENSIONS:
             await self.load_extension(f'extensions.{extension}')
+
+    async def on_ready(self) -> None:
+        if self._startup_event_sent:
+            return
+
+        self._startup_event_sent = True
+        await send_ops_log(
+            event_type='startup',
+            severity='info',
+            title='Discord Bot started',
+            summary='disable direct message bot is ready.',
+            extra={
+                'guildCount': len(self.guilds),
+                'botUser': str(self.user),
+            },
+        )
 
 
 def main() -> None:
