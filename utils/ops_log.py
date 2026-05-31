@@ -5,16 +5,16 @@ from typing import Any
 import aiohttp
 
 from constants import (
-    OPS_LOG_HUB_ENVIRONMENT,
     OPS_LOG_HUB_KEY,
-    OPS_LOG_HUB_PROJECT,
     OPS_LOG_HUB_TIMEOUT_SECONDS,
     OPS_LOG_HUB_URL,
+    OPS_LOG_ENVIRONMENT,
+    OPS_LOG_PROJECT,
 )
 
 
 def exception_message(error: BaseException) -> str:
-    return ''.join(traceback.format_exception(type(error), error, error.__traceback__))
+    return ''.join(traceback.format_exception_only(type(error), error)).strip()
 
 
 async def send_ops_log(
@@ -29,15 +29,15 @@ async def send_ops_log(
     guild_name: str | None = None,
     extra: dict[str, Any] | None = None,
 ) -> None:
-    if not OPS_LOG_HUB_URL:
+    if not OPS_LOG_HUB_URL or not OPS_LOG_HUB_KEY:
         return
 
     occurred_at = datetime.now(timezone.utc).isoformat()
     payload: dict[str, Any] = {
         'eventType': event_type,
         'severity': severity,
-        'project': OPS_LOG_HUB_PROJECT,
-        'environment': OPS_LOG_HUB_ENVIRONMENT,
+        'project': OPS_LOG_PROJECT,
+        'environment': OPS_LOG_ENVIRONMENT,
         'title': title,
         'summary': summary,
         'message': message,
@@ -70,8 +70,8 @@ def make_dedupe_key(event_type: str, severity: str, guild_id: str | None) -> str
     bucket = datetime.now(timezone.utc).strftime('%Y%m%d%H%M')
     return ':'.join(
         [
-            OPS_LOG_HUB_PROJECT,
-            OPS_LOG_HUB_ENVIRONMENT,
+            OPS_LOG_PROJECT,
+            OPS_LOG_ENVIRONMENT,
             severity,
             event_type,
             guild_id or 'global',
