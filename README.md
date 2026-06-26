@@ -54,6 +54,7 @@ OPS_LOG_ENVIRONMENT=production
 OPS_LOG_PROJECT=discordbot_disable_direct_message
 OPS_LOG_HUB_TIMEOUT_SECONDS=5
 DASHBOARD_CONFIG_URL=https://dashboard.discordbot.jp/api/bot-runtime/settings
+DASHBOARD_CONFIG_BOT_ID=bot_bcf6940c1d
 DASHBOARD_BOT_CONFIG_SECRET=
 ```
 
@@ -92,7 +93,7 @@ Railwayでは `Procfile` の `web: python main.py` を利用します。
 
 ## Discord Bot JP dashboard 連携
 
-`DASHBOARD_BOT_CONFIG_SECRET` を設定すると、Bot は `DASHBOARD_CONFIG_URL` からサーバー別設定を署名付きで取得します。
+`DASHBOARD_BOT_CONFIG_SECRET` を設定すると、Bot は `DASHBOARD_CONFIG_URL` から `DASHBOARD_CONFIG_BOT_ID` のサーバー別設定を署名付きで取得します。
 dashboard ではサーバーごとの有効/無効、更新周期、基準時刻を保存できます。
 Bot は無効化されたサーバーをスキップし、有効な設定の最短周期に定期タスク間隔を合わせます。
 

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlparse
 
-from constants import DASHBOARD_CONFIG_SECRET, DASHBOARD_CONFIG_URL, TOKEN
+from constants import DASHBOARD_CONFIG_BOT_ID, DASHBOARD_CONFIG_SECRET, DASHBOARD_CONFIG_URL, TOKEN
 
 
 @dataclass(frozen=True)
@@ -64,7 +64,7 @@ async def fetch_dashboard_settings() -> DashboardSettings:
     if not DASHBOARD_CONFIG_SECRET:
         return DashboardSettings(None)
 
-    bot_id = bot_id_from_token()
+    bot_id = DASHBOARD_CONFIG_BOT_ID or bot_id_from_token()
     base_url = DASHBOARD_CONFIG_URL.rstrip('/')
     url = f'{base_url}/{bot_id}'
     parsed = urlparse(url)

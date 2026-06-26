@@ -39,6 +39,7 @@ DASHBOARD_CONFIG_URL = getenv(
     'DASHBOARD_CONFIG_URL',
     'https://dashboard.discordbot.jp/api/bot-runtime/settings',
 )
+DASHBOARD_CONFIG_BOT_ID = getenv('DASHBOARD_CONFIG_BOT_ID', 'bot_bcf6940c1d')
 DASHBOARD_CONFIG_SECRET = getenv('DASHBOARD_BOT_CONFIG_SECRET') or getenv(
     'DASHBOARD_INGEST_SECRET',
 )
