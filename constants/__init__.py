@@ -35,3 +35,10 @@ OPS_LOG_HUB_KEY = getenv('OPS_LOG_HUB_KEY')
 OPS_LOG_ENVIRONMENT = getenv('OPS_LOG_ENVIRONMENT', 'production')
 OPS_LOG_PROJECT = getenv('OPS_LOG_PROJECT', 'discordbot_disable_direct_message')
 OPS_LOG_HUB_TIMEOUT_SECONDS = float_env('OPS_LOG_HUB_TIMEOUT_SECONDS', '5')
+DASHBOARD_CONFIG_URL = getenv(
+    'DASHBOARD_CONFIG_URL',
+    'https://dashboard.discordbot.jp/api/bot-runtime/settings',
+)
+DASHBOARD_CONFIG_SECRET = getenv('DASHBOARD_BOT_CONFIG_SECRET') or getenv(
+    'DASHBOARD_INGEST_SECRET',
+)

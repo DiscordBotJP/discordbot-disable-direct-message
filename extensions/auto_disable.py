@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from discord.ext import tasks
 
+from utils.dashboard_config import fetch_dashboard_settings
 from utils.ops_log import exception_message, send_ops_log
 
 
@@ -54,7 +55,13 @@ class AutoDisableDirectMessageCog(commands.Cog):
     async def update_guild_security_settings(self) -> None:
         now = discord.utils.utcnow()
         dms_disabled_until = now + datetime.timedelta(hours=24)
+        dashboard_settings = await fetch_dashboard_settings()
+        interval_minutes = dashboard_settings.shortest_interval_minutes(360)
+        if interval_minutes > 0:
+            self.auto_disable.change_interval(minutes=interval_minutes)
+
         updated_count = 0
+        disabled_count = 0
         forbidden_count = 0
         unexpected_error_count = 0
 
@@ -66,10 +73,16 @@ class AutoDisableDirectMessageCog(commands.Cog):
             extra={
                 'guildCount': len(self.bot.guilds),
                 'dmsDisabledUntil': dms_disabled_until.isoformat(),
+                'dashboardIntervalMinutes': interval_minutes,
             },
         )
 
         for guild in self.bot.guilds:
+            dashboard_setting = dashboard_settings.for_guild(guild.id)
+            if not dashboard_setting.enabled:
+                disabled_count += 1
+                continue
+
             invites_paused_until = guild.invites_paused_until
             invites_disabled_until = normalize_incident_until(
                 invites_paused_until,
@@ -130,9 +143,11 @@ class AutoDisableDirectMessageCog(commands.Cog):
             extra={
                 'guildCount': len(self.bot.guilds),
                 'updatedCount': updated_count,
+                'disabledCount': disabled_count,
                 'forbiddenCount': forbidden_count,
                 'unexpectedErrorCount': unexpected_error_count,
                 'dmsDisabledUntil': dms_disabled_until.isoformat(),
+                'dashboardIntervalMinutes': interval_minutes,
             },
         )
 

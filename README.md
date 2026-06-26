@@ -53,6 +53,8 @@ OPS_LOG_HUB_KEY=
 OPS_LOG_ENVIRONMENT=production
 OPS_LOG_PROJECT=discordbot_disable_direct_message
 OPS_LOG_HUB_TIMEOUT_SECONDS=5
+DASHBOARD_CONFIG_URL=https://dashboard.discordbot.jp/api/bot-runtime/settings
+DASHBOARD_BOT_CONFIG_SECRET=
 ```
 
 起動:
@@ -87,6 +89,12 @@ Railwayでは `Procfile` の `web: python main.py` を利用します。
 - DM一時停止設定は「全サーバー一律」で更新されます。サーバーごとの除外や手動優先期間は未実装です。
 - Botが対象サーバーを編集できない場合、そのサーバーでは設定更新されません。
 - ops-log-hubへ送るログには、Bot tokenや秘匿値を含めないでください。
+
+## Discord Bot JP dashboard 連携
+
+`DASHBOARD_BOT_CONFIG_SECRET` を設定すると、Bot は `DASHBOARD_CONFIG_URL` からサーバー別設定を署名付きで取得します。
+dashboard ではサーバーごとの有効/無効、更新周期、基準時刻を保存できます。
+Bot は無効化されたサーバーをスキップし、有効な設定の最短周期に定期タスク間隔を合わせます。
 
 ## 仕様詳細
 
